@@ -3,9 +3,11 @@ package com.example.grpc;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.stub.StreamObserver;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 
+@Slf4j
 public class GreeterServer {
 
     private static final int PORT = 50051;
@@ -16,28 +18,29 @@ public class GreeterServer {
                 .build()
                 .start();
 
-        System.out.println("Server started on port " + PORT);
+        log.info("Server started on port {}", PORT);
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            System.out.println("Shutting down server...");
+            log.info("Shutting down server...");
             server.shutdown();
         }));
 
         server.awaitTermination();
     }
 
+    @Slf4j
     static class GreeterServiceImpl extends GreeterServiceGrpc.GreeterServiceImplBase {
 
         // 단방향 RPC
         @Override
         public void sayHello(HelloRequest request, StreamObserver<HelloReply> responseObserver) {
-            System.out.println("[Server] SayHello request:\n" + request);
+            log.info("<<< [SERVER ← CLIENT] SayHello request:\n{}", request);
 
             HelloReply reply = HelloReply.newBuilder()
                     .setMessage("Hello, " + request.getName() + "!")
                     .build();
 
-            System.out.println("[Server] SayHello reply:\n" + reply);
+            log.info(">>> [SERVER → CLIENT] SayHello reply:\n{}", reply);
             responseObserver.onNext(reply);
             responseObserver.onCompleted();
         }
@@ -45,14 +48,14 @@ public class GreeterServer {
         // 서버 스트리밍 RPC
         @Override
         public void sayHelloStream(HelloRequest request, StreamObserver<HelloReply> responseObserver) {
-            System.out.println("[Server] SayHelloStream request:\n" + request);
+            log.info("<<< [SERVER ← CLIENT] SayHelloStream request:\n{}", request);
 
             int times = request.getTimes() > 0 ? request.getTimes() : 3;
             for (int i = 1; i <= times; i++) {
                 HelloReply reply = HelloReply.newBuilder()
                         .setMessage("Hello #" + i + ", " + request.getName() + "!")
                         .build();
-                System.out.println("[Server] SayHelloStream reply #" + i + ":\n" + reply);
+                log.info(">>> [SERVER → CLIENT] SayHelloStream reply #{}:\n{}", i, reply);
                 responseObserver.onNext(reply);
 
                 try {

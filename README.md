@@ -1,7 +1,7 @@
 # protobuf-ex
 
-gRPC와 Protocol Buffers를 활용한 Java 예제 프로젝트입니다.  
-단방향(Unary) RPC와 서버 스트리밍(Server Streaming) RPC를 구현합니다.
+Apache Flink와 Kafka 연계 테스트 학습 전, Protocol Buffers에 대한 사전 지식을 습득하기 위해 만든 예제 프로젝트입니다.  
+gRPC와 Protocol Buffers를 활용한 단방향(Unary) RPC와 서버 스트리밍(Server Streaming) RPC를 구현합니다.
 
 ## 프로젝트 구조
 
@@ -34,41 +34,41 @@ protobuf-ex/
 ### `GreeterServer.java`
 포트 `50051`에서 gRPC 서버를 실행합니다.  
 `GreeterServiceImplBase`를 상속해 두 RPC를 구현하며, 서버 스트리밍 시 응답 간 300ms 딜레이를 둡니다.  
-요청/응답마다 Protobuf 메시지 전체 내용을 로그로 출력합니다.
+`@Slf4j`로 요청/응답마다 Protobuf 메시지 전체 내용을 출력하며, `<<<`는 수신, `>>>`는 송신을 나타냅니다.
 
 ```
-[Server] SayHello request:
+<<< [SERVER ← CLIENT] SayHello request:
 name: "World"
 
-[Server] SayHello reply:
+>>> [SERVER → CLIENT] SayHello reply:
 message: "Hello, World!"
 
-[Server] SayHelloStream request:
+<<< [SERVER ← CLIENT] SayHelloStream request:
 name: "Kotlin"
 times: 5
 
-[Server] SayHelloStream reply #1:
+>>> [SERVER → CLIENT] SayHelloStream reply #1:
 message: "Hello #1, Kotlin!"
 ```
 
 ### `GreeterClient.java`
 `localhost:50051`에 연결해 두 RPC를 순서대로 호출합니다.  
-요청/응답마다 Protobuf 메시지 전체 내용을 로그로 출력합니다.
+`@Slf4j`로 요청/응답마다 Protobuf 메시지 전체 내용을 출력하며, `>>>`는 송신, `<<<`는 수신을 나타냅니다.
 
 ```
 === SayHello (Unary) ===
-[Client] SayHello request:
+>>> [CLIENT → SERVER] SayHello request:
 name: "World"
 
-[Client] SayHello reply:
+<<< [CLIENT ← SERVER] SayHello reply:
 message: "Hello, World!"
 
 === SayHelloStream (Server Streaming) ===
-[Client] SayHelloStream request:
+>>> [CLIENT → SERVER] SayHelloStream request:
 name: "Kotlin"
 times: 5
 
-[Client] SayHelloStream reply #1:
+<<< [CLIENT ← SERVER] SayHelloStream reply #1:
 message: "Hello #1, Kotlin!"
 ```
 
